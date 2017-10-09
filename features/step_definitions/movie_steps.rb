@@ -57,9 +57,9 @@ When /^I have opted to see movies rated: "(.*?)"$/ do |arg1|
   # using the appropriate Capybara command(s)
 
   page.uncheck("ratings_G")
+  page.uncheck("ratings_PG-13")
   page.uncheck("ratings_PG")
   page.uncheck("ratings_R")
-  page.uncheck("ratings_PG-13")
 
   ratings = arg1.split(",").map(&:strip)
   ratings.each do |rating|
@@ -73,10 +73,10 @@ Then /^I should see only movies rated: "(.*?)"$/ do |arg1|
   ratings.each do |rating|
 	# movies = Movie.find_all_by_rating(rating)
 	movies = Movie.where(rating:ratings).all
-	movies.each do |movie|
-	  expect(page).to have_content(movie.title)
-	    end
-    end
+	  movies.each do |movie|
+	    expect(page).to have_content(movie.title)
+	  end
+  end
 end
 
 Then /^I should see all of the movies$/ do
@@ -103,7 +103,7 @@ end
 Then(/^I should see "(.*?)" before I see "(.*?)"$/) do |arg1, arg2|
   regexpr = /#{arg1}.*#{arg2}.*/m
   a=false
-  if  (page.source =~ regexpr)
+  if (page.source =~ regexpr)
     a=true
   end
   expect(a).to be_truthy
