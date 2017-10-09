@@ -46,12 +46,8 @@ Given /^I am on the RottenPotatoes home page$/ do
 # Add a declarative step here for populating the DB with movies.
 
 Given /the following movies have been added to RottenPotatoes:/ do |movies_table|
-  pending  # Remove this statement when you finish implementing the test step
   movies_table.hashes.each do |movie|
-    # Each returned movie will be a hash representing one row of the movies_table
-    # The keys will be the table headers and the values will be the row contents.
-    # Entries can be directly to the database with ActiveRecord methods
-    # Add the necessary Active Record call(s) to populate the database.
+    Movie.create!(movie)
   end
 end
 
@@ -59,16 +55,59 @@ When /^I have opted to see movies rated: "(.*?)"$/ do |arg1|
   # HINT: use String#split to split up the rating_list, then
   # iterate over the ratings and check/uncheck the ratings
   # using the appropriate Capybara command(s)
-  pending  #remove this statement after implementing the test step
+
+  page.uncheck("ratings_G")
+  page.uncheck("ratings_PG")
+  page.uncheck("ratings_R")
+  page.uncheck("ratings_PG-13")
+
+  ratings = arg1.split(",").map(&:strip)
+  ratings.each do |rating|
+	  page.check("ratings_#{rating}") 
+  end
+  find_button('ratings_submit').click
 end
 
 Then /^I should see only movies rated: "(.*?)"$/ do |arg1|
-  pending  #remove this statement after implementing the test step
+  ratings = arg1.split(",").map(&:strip)
+  ratings.each do |rating|
+	# movies = Movie.find_all_by_rating(rating)
+	movies = Movie.where(rating:ratings).all
+	movies.each do |movie|
+	  expect(page).to have_content(movie.title)
+	    end
+    end
 end
 
 Then /^I should see all of the movies$/ do
-  pending  #remove this statement after implementing the test step
+  (Movie.count).should == all("table#movies tbody tr").count
 end
+
+When(/^I click Movie Title$/) do
+  click_link "title_header"
+end
+
+Then(/^I should see "(.*?)" before "(.*?)"$/) do |arg1, arg2|
+  regexpr = /#{arg1}.*#{arg2}.*/m
+  a=false
+  if (page.source =~ regexpr)
+    a=true
+  end
+  expect(a).to be_truthy
+ end    
+ 
+When(/^I click Release Date$/) do
+  click_link "release_date_header"
+end
+ 
+Then(/^I should see "(.*?)" before I see "(.*?)"$/) do |arg1, arg2|
+  regexpr = /#{arg1}.*#{arg2}.*/m
+  a=false
+  if  (page.source =~ regexpr)
+    a=true
+  end
+  expect(a).to be_truthy
+ end   
 
 
 
